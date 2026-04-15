@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>hayashi.log — JLPT N5～N2</title>
+<!-- GA4: replace G-XXXXXXXXXX with your Measurement ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="manifest" href="manifest.json">
@@ -747,8 +750,10 @@ body {
 <div class="overlay" id="overlay" onclick="toggleSd()"></div>
 <main class="mn" id="mn"></main>
 <footer class="ft">
-  <a href="https://github.com/miafrontend2026/hayashi.log" target="_blank">hayashi GitHub</a> ｜
-  <span id="ftInfo">N5 119 項 ＋ N4 120 項 完整收錄</span>
+  <div>&copy; 2026 hayashi.log — All rights reserved.</div>
+  <div style="margin-top:4px">本站內容為原創整理，不隸屬於 JLPT 官方或任何教育機構。</div>
+  <div style="margin-top:4px"><span id="ftInfo"></span></div>
+  <div style="margin-top:6px;opacity:.5"><a href="https://github.com/miafrontend2026/hayashi.log" target="_blank">GitHub</a></div>
 </footer>
 <button class="bt" id="bt" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
