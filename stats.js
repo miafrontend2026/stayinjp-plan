@@ -360,5 +360,5 @@ const Stats = (() => {
     }, correct ? 500 : 1000);
   }
 
-  return { open, close, switchTab, quizWeak, retryWrong, _answerWeak, addToNotebook, removeFromNotebook, quizNotebook, reviewNotebook, _nbNext };
+  return { open, close, switchTab, quizWeak, retryWrong, _answerWeak, addToNotebook, removeFromNotebook, quizNotebook, reviewNotebook };
 })();
