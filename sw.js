@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hayashi-v3';
+const CACHE_NAME = 'hayashi-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -18,6 +18,9 @@ const ASSETS = [
   './grammar-drill.js',
   './virtual-list.js',
   './calendar.js',
+  './mock-exam.js',
+  './reading.js',
+  './listening.js',
   './icon.svg',
   './manifest.json'
 ];
