@@ -1,10 +1,10 @@
 {
-  "name": "hayashi — JLPT備考",
-  "short_name": "hayashi",
+  "name": "再留計劃 — JLPT N5～N1",
+  "short_name": "再留計劃",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#FFFBEB",
-  "theme_color": "#1E293B",
+  "background_color": "#FAF9F6",
+  "theme_color": "#2C2C2C",
   "icons": [
     {
       "src": "icon.svg",
