@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sairyuu-v8';
+const CACHE_NAME = 'stayjp-v9';
 const ASSETS = [
   './',
   './index.html',
