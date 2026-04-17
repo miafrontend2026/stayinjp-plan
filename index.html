@@ -600,8 +600,8 @@ body {
 
 /* == Desktop: hide bottom nav, show sidebar == */
 @media (min-width: 769px) {
-  .ftb { display: none; }
-  .drawer-bg { display: none !important; }
+  .ftb { left: var(--sw); }
+  /* drawer still works on desktop */
 }
 
 /* == Small mobile (max-width: 420px) == */
