@@ -1181,6 +1181,7 @@ function saveDailyProgress(lv, prog) {
     const d = JSON.parse(localStorage.getItem(DAILY_KEY) || '{}');
     d[lv] = prog;
     localStorage.setItem(DAILY_KEY, JSON.stringify(d));
+    if (typeof saveAllCloud === 'function') saveAllCloud();
   } catch(e) {}
 }
 function toggleDailyMode() {
@@ -1631,9 +1632,11 @@ function fixHeaderHeight() {
 }
 window.addEventListener('resize', fixHeaderHeight);
 
-// Service Worker
+// Service Worker — force update check on every load
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    reg.update();
+  }).catch(() => {});
 }
 
 // ========== THEME ==========
