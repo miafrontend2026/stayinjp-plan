@@ -12,6 +12,11 @@
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="再留計劃">
+<meta name="description" content="免費 JLPT N5～N1 備考工具。7700+ 單字、430+ 文法、模擬考、SRS 複習、聽力讀解練習。">
+<meta property="og:title" content="日本再留計劃 — JLPT N5～N1 備考">
+<meta property="og:description" content="免費 JLPT 備考工具。7700+ 單字、430+ 文法、模擬考、SRS 間隔複習。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icon.svg">
 <meta name="theme-color" content="#2C2C2C">
 <style>
 /* ======================================================
@@ -900,7 +905,7 @@ body {
     <div class="drawer-handle"></div>
     <div class="drawer-grid">
       <button onclick="Stats.open();closeDrawer()"><svg viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>統計</button>
-      <button onclick="toggleFavFilter();closeDrawer()"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>生詞本</button>
+      <button onclick="Stats.open();setTimeout(()=>Stats.switchTab('notebook'),100);closeDrawer()"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>生詞本</button>
       <button onclick="closeDrawer()"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/></svg>設定</button>
     </div>
   </div>
@@ -980,7 +985,7 @@ const FAV_INIT = {n5:[],n4:[],n3:[],n2:[],n1:[],vn5:[],vn4:[],vn3:[],vn2:[],vn1:
 let favorites = {...FAV_INIT};
 
 function loadFavorites() {
-  try { const s=JSON.parse(localStorage.getItem('deguchi_fav')); favorites={...FAV_INIT,...s}; } catch(e){ favorites={...FAV_INIT}; }
+  try { const s=JSON.parse(localStorage.getItem('sairyuu_fav')); favorites={...FAV_INIT,...s}; } catch(e){ favorites={...FAV_INIT}; }
   if (currentUser && db) {
     db.collection('users').doc(currentUser.uid).get().then(doc => {
       if (doc.exists) {
@@ -994,7 +999,7 @@ function loadFavorites() {
     }).catch(() => doRender());
   } else { doRender(); }
 }
-function saveFavLocal() { localStorage.setItem('deguchi_fav', JSON.stringify(favorites)); }
+function saveFavLocal() { localStorage.setItem('sairyuu_fav', JSON.stringify(favorites)); }
 function saveFavCloud() {
   if (currentUser && db) {
     db.collection('users').doc(currentUser.uid).set({ favorites }, { merge: true });
