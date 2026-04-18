@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * validate.js
- * Validates all data files for the deguchi-n5-notes website.
+ * Validates all JLPT data files.
  *
  * Checks:
  *   1. All JS files have valid syntax
@@ -192,7 +192,7 @@ function validateGrammar(data, level, fileName) {
 // --------------- main ---------------
 
 function main() {
-  console.log('=== Deguchi N5 Notes - Data Validation ===\n');
+  console.log('=== StayJP Study - Data Validation ===\n');
 
   const stats = {
     vocab: {},
