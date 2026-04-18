@@ -138,14 +138,17 @@ a:hover { text-decoration: underline; }
 [data-theme="dark"] .hero {
   background: linear-gradient(180deg, var(--bg) 0%, var(--bg3) 100%);
 }
+.hero-banner {
+  display: block; max-width: 720px; width: 100%;
+  margin: 0 auto 28px; border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.08);
+  position: relative;
+}
+[data-theme="dark"] .hero-banner { box-shadow: 0 8px 32px rgba(0,0,0,.4); }
 .hero-title {
   font-size: 42px; font-weight: 800; letter-spacing: -.5px;
   margin-bottom: 16px; position: relative;
   line-height: 1.3;
-}
-.hero-subtitle {
-  font-size: 20px; color: var(--tx2); margin-bottom: 16px;
-  font-weight: 500; position: relative;
 }
 .hero-desc {
   max-width: 560px; margin: 0 auto 36px;
@@ -275,8 +278,8 @@ a:hover { text-decoration: underline; }
 @media(max-width:768px) {
   .hero { padding: calc(var(--hh) + 48px) 20px 56px; }
   .hero-title { font-size: 30px; }
-  .hero-subtitle { font-size: 17px; }
   .hero-desc { font-size: 14px; }
+  .hero-banner { margin-bottom: 22px; border-radius: 14px; }
   .features { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .section { padding: 48px 16px; }
@@ -306,8 +309,8 @@ a:hover { text-decoration: underline; }
 
 <!-- Hero -->
 <section class="hero">
+  <img src="staybanner.jpg" alt="再留計劃" class="hero-banner" loading="eager">
   <h2 class="hero-title">再留計劃 — 免費 JLPT 備考工具</h2>
-  <p class="hero-subtitle">為了留在日本，做了這個工具。</p>
   <p class="hero-desc">為了通過 JLPT N2 拿到簽證續簽資格，把所有備考資源整理成一個免費工具。7,710 個單字、433 個文法、模擬考、SRS 間隔複習、聽力讀解練習。全部免費，打開就能用。</p>
   <a href="index.html" class="hero-cta">開始學習 <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
 </section>
@@ -331,7 +334,7 @@ a:hover { text-decoration: underline; }
           <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         </div>
         <div class="feature-title">433 個文法</div>
-        <div class="feature-desc">接續規則、例句、大阪場景，翻牌記憶不會忘</div>
+        <div class="feature-desc">接續規則、情境例句、翻牌式間隔複習</div>
       </div>
 
       <div class="feature-card">
@@ -357,11 +360,11 @@ a:hover { text-decoration: underline; }
 <!-- Story -->
 <section class="section story">
   <div class="section-inner">
-    <h2 class="section-title">為什麼免費？</h2>
+    <h2 class="section-title">設計理念</h2>
     <div class="story-text">
-      <p>市面上的 JLPT 備考 app 不是要月費就是功能分散在好幾個地方。</p>
-      <p>這個工具把單字、文法、模考、複習全整合在同一頁，不用註冊不用付費，打開瀏覽器就能開始。</p>
-      <p>覺得有用的話，幫忙分享給也在準備 JLPT 的朋友就好。</p>
+      <p>單字、文法、模擬考、SRS 間隔複習整合在同一站，免註冊、免付費、資料存放本地裝置。</p>
+      <p>介面以 <strong>每日固定份量</strong> 為核心：每天 20 個單字、10 個文法點，搭配間隔複習與計時模考，避免一次塞太多而放棄。</p>
+      <p>若工具對你有幫助，歡迎分享或透過 Buy Me a Coffee 支持持續維護。</p>
     </div>
   </div>
 </section>
