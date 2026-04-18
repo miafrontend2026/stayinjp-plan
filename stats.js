@@ -130,7 +130,7 @@ const Stats = (() => {
         h += '<div class="st-weak-item">';
         h += '<span class="st-weak-word">' + w.w + '</span>';
         h += '<span class="st-weak-reading">' + (w.w !== w.r ? w.r : '') + '</span>';
-        h += '<span class="st-weak-meaning">' + w.m + '</span>';
+        h += '<span class="st-weak-meaning">' + (typeof cvt==='function'?cvt(w.m):w.m) + '</span>';
         h += '<span class="st-weak-lv">' + w.lv.toUpperCase() + '</span>';
         h += '<button style="background:none;border:none;color:var(--wrong,#dc2626);cursor:pointer;font-size:12px;padding:2px 4px" onclick="Stats.removeFromNotebook(\'' + w.w.replace(/'/g, "\\'") + '\',\'' + w.lv + '\')">✕</button>';
         h += '</div>';
@@ -170,7 +170,7 @@ const Stats = (() => {
         <div class="qhd"><span>${t('nb_progress', { cur: cur+1, total: nb.length })}</span><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="Stats.close()">✕</button></div>
         <div class="srs-card" onclick="this.querySelector('#nbBack').style.display='';this.querySelector('#nbFront').style.display='none'">
           <div id="nbFront"><div class="qmain">${item.w}</div>${item.w!==item.r?'<div class="qsub">'+item.r+'</div>':''}<div class="srs-hint">${t('flip_hint')}</div></div>
-          <div id="nbBack" style="display:none"><div class="qmain">${item.w}</div>${item.w!==item.r?'<div class="qsub">'+item.r+'</div>':''}<div class="srs-meaning">${item.m}</div>
+          <div id="nbBack" style="display:none"><div class="qmain">${item.w}</div>${item.w!==item.r?'<div class="qsub">'+item.r+'</div>':''}<div class="srs-meaning">${typeof cvt==='function'?cvt(item.m):item.m}</div>
             <div class="srs-btns">
               <button class="srs-btn srs-hard" onclick="event.stopPropagation();Stats._nbNext()">${t('nb_next')}</button>
               <button class="srs-btn srs-ok" onclick="event.stopPropagation();Stats.removeFromNotebook('${item.w.replace(/'/g,"\\'")}','${item.lv}');Stats._nbNext()">${t('nb_remove')}</button>
@@ -273,7 +273,7 @@ const Stats = (() => {
       h += '<div class="st-weak-item">' +
         '<span class="st-weak-word">' + w.w + '</span>' +
         '<span class="st-weak-reading">' + (w.w !== w.r ? w.r : '') + '</span>' +
-        '<span class="st-weak-meaning">' + w.m + '</span>' +
+        '<span class="st-weak-meaning">' + (typeof cvt==='function'?cvt(w.m):w.m) + '</span>' +
         '<span class="st-weak-rate" style="color:' + rateColor + '">' + w.rate + '%</span>' +
         '<span class="st-weak-lv">' + w.level.toUpperCase() + '</span></div>';
     });

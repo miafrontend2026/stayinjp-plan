@@ -1575,11 +1575,11 @@ function renderVocab() {
       buffer: 15,
       renderItem: (entry) => {
         if (entry.type === 'header') {
-          return `<section class="cs"><h2><span class="ci2">${entry.cat.icon}</span>${entry.cat.name}<span style="font-size:12px;color:#999;font-weight:400;margin-left:auto">${t('cat_count_vocab', { n: entry.count })}</span></h2></section>`;
+          return `<section class="cs"><h2><span class="ci2">${entry.cat.icon}</span>${cvt(entry.cat.name)}<span style="font-size:12px;color:#999;font-weight:400;margin-left:auto">${t('cat_count_vocab', { n: entry.count })}</span></h2></section>`;
         }
         const d = entry.d;
         const isFav = favList.includes(d.w);
-        return `<div class="vi" data-fid="${d.w}" data-w="${d.w}" data-r="${d.r||''}"><div class="vl"><div class="vw">${d.w}</div>${d.w!==d.r?`<div class="vr">${d.r}</div>`:''}<div class="vm">${d.m}</div></div>${spkSvg}<span class="vp">${entry.catName}</span><svg class="star ${isFav?'on':''}" onclick="toggleFav('${d.w.replace(/'/g,"\\'")}')" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>`;
+        return `<div class="vi" data-fid="${d.w}" data-w="${d.w}" data-r="${d.r||''}"><div class="vl"><div class="vw">${d.w}</div>${d.w!==d.r?`<div class="vr">${d.r}</div>`:''}<div class="vm">${cvt(d.m)}</div></div>${spkSvg}<span class="vp">${cvt(entry.catName)}</span><svg class="star ${isFav?'on':''}" onclick="toggleFav('${d.w.replace(/'/g,"\\'")}')" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>`;
       }
     });
 
@@ -1594,11 +1594,11 @@ function renderVocab() {
       const items = groups[cat.key];
       if (!items||!items.length) return;
       vc += items.length;
-      h += `<section class="cs" id="vcat-${cat.key}"><h2><span class="ci2">${cat.icon}</span>${cat.name}<span style="font-size:12px;color:#999;font-weight:400;margin-left:auto">${t('cat_count_vocab', { n: items.length })}</span></h2>`;
+      h += `<section class="cs" id="vcat-${cat.key}"><h2><span class="ci2">${cat.icon}</span>${cvt(cat.name)}<span style="font-size:12px;color:#999;font-weight:400;margin-left:auto">${t('cat_count_vocab', { n: items.length })}</span></h2>`;
       h += '<div class="vg">';
       items.forEach(d => {
         const isFav = favList.includes(d.w);
-        h += `<div class="vi" data-fid="${d.w}" data-w="${d.w}" data-r="${d.r||''}"><div class="vl"><div class="vw">${d.w}</div>${d.w!==d.r?`<div class="vr">${d.r}</div>`:''}<div class="vm">${d.m}</div></div>${spkSvg}<span class="vp">${cat.name}</span><svg class="star ${isFav?'on':''}" onclick="toggleFav('${d.w.replace(/'/g,"\\'")}')" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>`;
+        h += `<div class="vi" data-fid="${d.w}" data-w="${d.w}" data-r="${d.r||''}"><div class="vl"><div class="vw">${d.w}</div>${d.w!==d.r?`<div class="vr">${d.r}</div>`:''}<div class="vm">${cvt(d.m)}</div></div>${spkSvg}<span class="vp">${cvt(cat.name)}</span><svg class="star ${isFav?'on':''}" onclick="toggleFav('${d.w.replace(/'/g,"\\'")}')" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>`;
       });
       h += '</div></section>';
     });
@@ -1614,7 +1614,7 @@ function renderVocab() {
   VOCAB_CATS.forEach(cat => {
     const items = groups[cat.key];
     if (!items||!items.length) return;
-    sh += `<div class="ct" onclick="toggleCat(this)">${cat.name} (${items.length})</div><div class="ci" style="max-height:${Math.min(items.length*28,400)}px">`;
+    sh += `<div class="ct" onclick="toggleCat(this)">${cvt(cat.name)} (${items.length})</div><div class="ci" style="max-height:${Math.min(items.length*28,400)}px">`;
     items.slice(0,50).forEach(d => { sh += `<a href="#vcat-${cat.key}" onclick="closeSdMobile()">${d.w} ${d.m}</a>`; });
     if(items.length>50) sh+=`<a href="#vcat-${cat.key}" style="color:var(--ac)" onclick="closeSdMobile()">${t('sidebar_more', { n: items.length-50 })}</a>`;
     sh += '</div>';
@@ -1644,17 +1644,17 @@ function renderConfuse() {
   }
 
   filtered.forEach(cf => {
-    h += '<div class="cf-card" onclick="this.classList.toggle(\'o\')"><div class="cf-hd"><span class="cf-lv">'+cf.level+'</span>'+cf.title+'<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="cf-bd"><div class="cf-words">';
+    h += '<div class="cf-card" onclick="this.classList.toggle(\'o\')"><div class="cf-hd"><span class="cf-lv">'+cf.level+'</span>'+cvt(cf.title)+'<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="cf-bd"><div class="cf-words">';
     cf.words.forEach(w => {
-      h += '<div class="cf-w"><span class="cfw">'+w.w+'</span><span class="cfm">'+w.m+'</span><span class="cfn">'+w.note+'</span></div>';
+      h += '<div class="cf-w"><span class="cfw">'+w.w+'</span><span class="cfm">'+cvt(w.m)+'</span><span class="cfn">'+cvt(w.note)+'</span></div>';
     });
     h += '</div>';
-    if (cf.tip) h += '<div class="cf-tip">'+cf.tip+'</div>';
+    if (cf.tip) h += '<div class="cf-tip">'+cvt(cf.tip)+'</div>';
     if (cf.eg && cf.eg.length) {
       h += '<div class="cf-eg">';
       cf.eg.forEach(e => {
         const pureJ = e.j.replace(/<[^>]+>/g,'').replace(/'/g,"\\'");
-        h += '<div class="ex"><div class="j">'+e.j+'<svg class="ex-spk" onclick="event.stopPropagation();speak(\''+pureJ+'\')" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg></div><div class="z">'+e.z+'</div></div>';
+        h += '<div class="ex"><div class="j">'+e.j+'<svg class="ex-spk" onclick="event.stopPropagation();speak(\''+pureJ+'\')" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg></div><div class="z">'+cvt(e.z)+'</div></div>';
       });
       h += '</div>';
     }
@@ -1728,15 +1728,15 @@ function render() {
     const items = groups[cat.name];
     if (!items||!items.length) return;
     vc += items.length;
-    h += `<section class="cs" id="cat-${cat.name}"><h2><span class="ci2">${cat.icon}</span>${cat.name}<span style="font-size:12px;color:#999;font-weight:400;margin-left:auto">${t('cat_count_grammar', { n: items.length })}</span></h2>`;
+    h += `<section class="cs" id="cat-${cat.name}"><h2><span class="ci2">${cat.icon}</span>${cvt(cat.name)}<span style="font-size:12px;color:#999;font-weight:400;margin-left:auto">${t('cat_count_grammar', { n: items.length })}</span></h2>`;
     items.forEach((d,i) => {
       const isFav = favList.includes(d.id);
       const idx = data.indexOf(d) + 1;
       const reportUrl = `https://github.com/miafrontend2026/stayjp.study/issues/new?title=${encodeURIComponent('[文法錯誤] ' + d.id + ' ' + d.t)}&labels=content-error&body=${encodeURIComponent('文法 ID：' + d.id + '\n文法名：' + d.t + '\n\n錯誤描述：\n（請說明哪裡有錯，例如：接續格式、例句語感、中譯…）\n')}`;
-      h += `<div class="gc" id="${d.id}"><div class="gh" onclick="toggleCard(this)"><span class="gn">${idx}</span><span class="gt">${d.t}</span><svg class="star ${isFav?'on':''}" onclick="event.stopPropagation();toggleFav('${d.id}')" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="gb"><div class="gx"><div class="pt">${d.p}</div><div class="ep">${d.ex}</div><div class="eg">${d.eg.map(e=>{
+      h += `<div class="gc" id="${d.id}"><div class="gh" onclick="toggleCard(this)"><span class="gn">${idx}</span><span class="gt">${d.t}</span><svg class="star ${isFav?'on':''}" onclick="event.stopPropagation();toggleFav('${d.id}')" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="gb"><div class="gx"><div class="pt">${d.p}</div><div class="ep">${cvt(d.ex)}</div><div class="eg">${d.eg.map(e=>{
         const pureJ = e.j.replace(/<[^>]+>/g,'').replace(/'/g,"\\'");
-        return `<div class="ex"><div class="j">${e.j}<svg class="ex-spk" onclick="event.stopPropagation();speak('${pureJ}')" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg></div><div class="z">${e.z}</div></div>`;
-      }).join('')}</div>${d.n?`<div class="nt">${d.n}</div>`:''}<a class="gc-report" href="${reportUrl}" target="_blank" rel="noopener">${t('report_error')}</a></div></div></div>`;
+        return `<div class="ex"><div class="j">${e.j}<svg class="ex-spk" onclick="event.stopPropagation();speak('${pureJ}')" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg></div><div class="z">${cvt(e.z)}</div></div>`;
+      }).join('')}</div>${d.n?`<div class="nt">${cvt(d.n)}</div>`:''}<a class="gc-report" href="${reportUrl}" target="_blank" rel="noopener">${t('report_error')}</a></div></div></div>`;
     });
     h += '</section>';
   });
@@ -1753,7 +1753,7 @@ function render() {
   cats.forEach(cat => {
     const items = groups[cat.name];
     if (!items||!items.length) return;
-    sh += `<div class="ct" onclick="toggleCat(this)">${cat.name}</div><div class="ci" style="max-height:${items.length*28}px">`;
+    sh += `<div class="ct" onclick="toggleCat(this)">${cvt(cat.name)}</div><div class="ci" style="max-height:${items.length*28}px">`;
     items.forEach(d => { sh += `<a href="#${d.id}" onclick="closeSdMobile()">${d.t}</a>`; });
     sh += '</div>';
   });
@@ -1794,6 +1794,30 @@ if ('serviceWorker' in navigator) {
 const LANG_CYCLE = ['zh-TW', 'zh-CN'];
 const LANG_LABEL = { 'zh-TW': '繁', 'zh-CN': '简' };
 
+// OpenCC 繁→簡 runtime 轉換（保留單一資料來源）
+let _tw2cn = null;
+function ensureOpenCC() {
+  return new Promise((resolve) => {
+    if (_tw2cn) return resolve(_tw2cn);
+    if (window.OpenCC) {
+      _tw2cn = window.OpenCC.Converter({ from: 'tw', to: 'cn' });
+      return resolve(_tw2cn);
+    }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js';
+    s.onload = () => { _tw2cn = window.OpenCC.Converter({ from: 'tw', to: 'cn' }); resolve(_tw2cn); };
+    s.onerror = () => resolve(null);
+    document.head.appendChild(s);
+  });
+}
+
+// cvt(text): 若當前語言是 zh-CN，用 OpenCC 轉繁→簡；否則原樣回傳
+// 用於：中文說明/中譯/分類名等非日文內容
+function cvt(text) {
+  if (!text || I18n.getLang() !== 'zh-CN' || !_tw2cn) return text;
+  return _tw2cn(text);
+}
+
 function applyI18n() {
   // 移除 EN 支援：若 localStorage 存的是 'en'，強制切回繁中
   if (!LANG_CYCLE.includes(I18n.getLang())) I18n.setLang('zh-TW');
@@ -1812,14 +1836,20 @@ function applyI18n() {
   if (btn) btn.textContent = LANG_LABEL[I18n.getLang()] || '繁';
 }
 
-function cycleLang() {
+async function cycleLang() {
   const cur = I18n.getLang();
   const idx = LANG_CYCLE.indexOf(cur);
   const next = LANG_CYCLE[(idx + 1) % LANG_CYCLE.length];
   I18n.setLang(next);
+  if (next === 'zh-CN') await ensureOpenCC();
   applyI18n();
   updateAuthUI();
   if (typeof doRender === 'function') doRender();
+}
+
+// 若 localStorage 記錄使用者上次選簡中，頁面載入就先把 OpenCC 準備好再 render
+if (typeof I18n !== 'undefined' && I18n.getLang() === 'zh-CN') {
+  ensureOpenCC().then(() => { if (typeof doRender === 'function') doRender(); });
 }
 
 // ========== THEME ==========

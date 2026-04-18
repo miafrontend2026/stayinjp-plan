@@ -114,11 +114,12 @@ const GrammarDrill = (() => {
         <div id="gdBack" style="display:none">
           <div style="font-size:18px;font-weight:700;margin-bottom:8px">${g.t}</div>
           <div style="background:#FEF3C7;border-radius:7px;padding:8px 12px;font-size:14px;font-weight:600;color:#92400E;border-left:3px solid #D97706;margin:8px 0">${g.p}</div>
-          <div style="font-size:13px;color:#334155;margin:8px 0;line-height:1.7">${g.ex}</div>
+          <div style="font-size:13px;color:#334155;margin:8px 0;line-height:1.7">${typeof cvt==='function'?cvt(g.ex):g.ex}</div>
           <div style="margin:8px 0;font-size:13px">${g.eg.map(e=>{
             const pureJ = e.j.replace(/<[^>]+>/g,'').replace(/'/g,"\\'");
             const spk = `<svg class="spk-inline" style="width:16px;height:16px;cursor:pointer;vertical-align:middle;margin-left:4px;stroke:#2563EB;fill:none;stroke-width:2;opacity:.7" onclick="event.stopPropagation();speak('${pureJ}')" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg>`;
-            return '<div style="padding:3px 0"><span style="color:#2563EB">'+e.j+'</span>'+spk+'<br><span style="color:#64748B;font-size:12px">'+e.z+'</span></div>';
+            const z = typeof cvt==='function' ? cvt(e.z) : e.z;
+            return '<div style="padding:3px 0"><span style="color:#2563EB">'+e.j+'</span>'+spk+'<br><span style="color:#64748B;font-size:12px">'+z+'</span></div>';
           }).join('')}</div>
           <div class="srs-btns">
             <button class="srs-btn srs-hard" onclick="event.stopPropagation();GrammarDrill.rate(false)">${t('gd_hard')}</button>
@@ -187,7 +188,7 @@ const GrammarDrill = (() => {
     const spk = `<svg class="spk-inline" style="width:18px;height:18px;cursor:pointer;vertical-align:middle;margin-left:6px;stroke:var(--ac2);fill:none;stroke-width:2" onclick="speak('${pureJ}')" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg>`;
     document.getElementById('quizBox').innerHTML = `
       <div class="qhd"><span>${t('gd_quiz_mode')} ${cur+1} / ${queue.length}</span><span>${t('quiz_score', { n: gqScore })}</span><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="GrammarDrill.close()">✕</button></div>
-      <div class="qprompt"><div style="font-size:16px;line-height:1.8;color:var(--tx)">${blanked}${spk}</div><div style="font-size:12px;color:var(--tx2);margin-top:4px">${eg.z}</div></div>
+      <div class="qprompt"><div style="font-size:16px;line-height:1.8;color:var(--tx)">${blanked}${spk}</div><div style="font-size:12px;color:var(--tx2);margin-top:4px">${typeof cvt==='function'?cvt(eg.z):eg.z}</div></div>
       <div class="qopts">${options.map((o, i) => '<button class="qopt" onclick="GrammarDrill.answerQuiz('+i+','+correctIdx+')">'+o+'</button>').join('')}</div>`;
   }
   function answerQuiz(idx, correctIdx) {

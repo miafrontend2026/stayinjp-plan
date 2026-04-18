@@ -90,7 +90,7 @@ const SRS = (() => {
         <div class="srs-back" id="srsBack" style="display:none">
           <div class="qmain">${item.w}</div>
           ${item.w!==item.r?'<div class="qsub">'+item.r+'</div>':''}
-          ${item.m && item.m!==item.w ? '<div class="srs-meaning">'+item.m+'</div>' : ''}
+          ${item.m && item.m!==item.w ? '<div class="srs-meaning">'+(typeof cvt==='function'?cvt(item.m):item.m)+'</div>' : ''}
           <div class="srs-btns">
             <button class="srs-btn srs-hard" onclick="event.stopPropagation();SRS.rate(false)">${t('srs_hard')}</button>
             <button class="srs-btn srs-ok" onclick="event.stopPropagation();SRS.rate(true)">${t('srs_ok')}</button>

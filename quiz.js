@@ -63,7 +63,7 @@ const Quiz = (() => {
   }
 
   function disp(item) {
-    if (quizType === 'word2meaning') return item.m;
+    if (quizType === 'word2meaning') return typeof cvt==='function'?cvt(item.m):item.m;
     if (quizType === 'meaning2word') return item.w + (item.w !== item.r ? '（' + item.r + '）' : '');
     return item.r;
   }
@@ -73,7 +73,7 @@ const Quiz = (() => {
     const box = document.getElementById('quizBox');
     let main, sub;
     if (quizType === 'word2meaning') { main = q.word.w; sub = q.word.w !== q.word.r ? q.word.r : ''; }
-    else if (quizType === 'meaning2word') { main = q.word.m; sub = ''; }
+    else if (quizType === 'meaning2word') { main = typeof cvt==='function'?cvt(q.word.m):q.word.m; sub = ''; }
     else { main = q.word.w; sub = t('quiz_reading_sub'); }
     box.innerHTML = `
       <div class="qhd"><span>${current+1} / ${questions.length}</span><span>${t('quiz_score', { n: score })}</span><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="Quiz.close()">✕</button></div>
@@ -106,8 +106,8 @@ const Quiz = (() => {
       <h3>${t('quiz_result')}</h3>
       <div class="qscore ${pct>=80?'good':pct>=60?'ok':'bad'}">${score} / ${questions.length}（${pct}%）</div>
       <div class="qresults">${results.map(r => r.correct
-        ? '<div class="qr ok"><span class="qrc">✓</span> '+r.word.w+' — '+r.word.m+'</div>'
-        : `<div class="qr ng"><span class="qrc">✗</span> ${r.word.w} — ${t('quiz_you_chose', { chose: disp(r.options[r.chosenIdx]), correct: r.word.m })}</div>`
+        ? '<div class="qr ok"><span class="qrc">✓</span> '+r.word.w+' — '+(typeof cvt==='function'?cvt(r.word.m):r.word.m)+'</div>'
+        : `<div class="qr ng"><span class="qrc">✗</span> ${r.word.w} — ${t('quiz_you_chose', { chose: disp(r.options[r.chosenIdx]), correct: typeof cvt==='function'?cvt(r.word.m):r.word.m })}</div>`
       ).join('')}</div>
       <div class="qactions"><button class="qstart" onclick="Quiz.begin()">${t('quiz_retry')}</button><button class="qclose" onclick="Quiz.close()">${t('quiz_back')}</button></div>`;
   }
