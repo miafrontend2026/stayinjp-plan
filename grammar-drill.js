@@ -40,22 +40,22 @@ const GrammarDrill = (() => {
   function start() {
     const box = document.getElementById('quizBox');
     box.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">文法練習</h3><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="GrammarDrill.close()">✕</button></div>
-      <div class="qf"><label>模式</label><div class="qo" id="gdMode">
-        <button class="on" data-v="flash">翻牌記憶</button>
-        <button data-v="quiz">選擇題測驗</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">${t('gd_title')}</h3><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="GrammarDrill.close()">✕</button></div>
+      <div class="qf"><label>${t('gd_mode')}</label><div class="qo" id="gdMode">
+        <button class="on" data-v="flash">${t('gd_flip_mode')}</button>
+        <button data-v="quiz">${t('gd_quiz_mode')}</button>
       </div></div>
-      <div class="qf"><label>級別</label><div class="qo" id="gdLevel">
+      <div class="qf"><label>${t('quiz_level')}</label><div class="qo" id="gdLevel">
         <button class="on" data-v="n5">N5</button><button data-v="n4">N4</button>
         <button data-v="n3">N3</button><button data-v="n2">N2</button><button data-v="n1">N1</button>
       </div></div>
-      <div class="qf"><label>範圍</label><div class="qo" id="gdRange">
-        <button data-v="due" class="on">待複習</button>
-        <button data-v="new">新的</button>
-        <button data-v="all">全部隨機</button>
+      <div class="qf"><label>${t('gd_range')}</label><div class="qo" id="gdRange">
+        <button data-v="due" class="on">${t('gd_range_due')}</button>
+        <button data-v="new">${t('gd_range_new')}</button>
+        <button data-v="all">${t('gd_range_all')}</button>
       </div></div>
-      <button class="qstart" onclick="GrammarDrill.begin()">開始</button>
-      <button class="qclose" onclick="GrammarDrill.close()">取消</button>`;
+      <button class="qstart" onclick="GrammarDrill.begin()">${t('gd_start')}</button>
+      <button class="qclose" onclick="GrammarDrill.close()">${t('gd_cancel')}</button>`;
     box.querySelectorAll('.qo').forEach(g => {
       g.querySelectorAll('button').forEach(b => {
         b.onclick = () => { g.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); };
@@ -73,7 +73,7 @@ const GrammarDrill = (() => {
     const rangeEl = document.querySelector('#gdRange .on');
     const range = rangeEl ? rangeEl.dataset.v : 'all';
     const data = getData(lvl);
-    if (!data || !data.length) { alert('此級別無文法資料'); return; }
+    if (!data || !data.length) { alert(t('gd_no_data')); return; }
     const srs = getSRS();
     const t = today();
 
@@ -92,7 +92,7 @@ const GrammarDrill = (() => {
       queue = [...data].sort(() => Math.random() - 0.5).slice(0, 20);
     }
 
-    if (!queue.length) { alert('沒有符合條件的文法點！'); return; }
+    if (!queue.length) { alert(t('gd_no_match')); return; }
     cur = 0;
     gqScore = 0; gqResults = [];
     if (quizMode === 'quiz') { renderQuizQ(); return; }
@@ -105,11 +105,11 @@ const GrammarDrill = (() => {
     const e = srs[g.id];
     const isNew = !e;
     document.getElementById('quizBox').innerHTML = `
-      <div class="qhd"><span>文法 ${cur+1} / ${queue.length}</span><span>${isNew?'🆕 新文法':'📖 複習'}</span><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="GrammarDrill.close()">✕</button></div>
+      <div class="qhd"><span>${t('grammar')} ${cur+1} / ${queue.length}</span><span>${isNew?t('gd_new'):t('gd_review')}</span><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="GrammarDrill.close()">✕</button></div>
       <div class="srs-card" onclick="GrammarDrill.flip()">
         <div id="gdFront">
           <div class="qmain" style="font-size:22px">${g.t}</div>
-          <div class="srs-hint">看到文法名，試著回想接續和意思 → 點擊翻面</div>
+          <div class="srs-hint">${t('gd_flip_hint')}</div>
         </div>
         <div id="gdBack" style="display:none">
           <div style="font-size:18px;font-weight:700;margin-bottom:8px">${g.t}</div>
@@ -121,8 +121,8 @@ const GrammarDrill = (() => {
             return '<div style="padding:3px 0"><span style="color:#2563EB">'+e.j+'</span>'+spk+'<br><span style="color:#64748B;font-size:12px">'+e.z+'</span></div>';
           }).join('')}</div>
           <div class="srs-btns">
-            <button class="srs-btn srs-hard" onclick="event.stopPropagation();GrammarDrill.rate(false)">不熟</button>
-            <button class="srs-btn srs-ok" onclick="event.stopPropagation();GrammarDrill.rate(true)">記得</button>
+            <button class="srs-btn srs-hard" onclick="event.stopPropagation();GrammarDrill.rate(false)">${t('gd_hard')}</button>
+            <button class="srs-btn srs-ok" onclick="event.stopPropagation();GrammarDrill.rate(true)">${t('gd_ok')}</button>
           </div>
         </div>
       </div>`;
@@ -143,12 +143,12 @@ const GrammarDrill = (() => {
 
   function showDone() {
     document.getElementById('quizBox').innerHTML = `
-      <h3>文法練習完成！</h3>
+      <h3>${t('gd_done')}</h3>
       <div class="srs-done-stats">
-        <div>今日練習：${queue.length} 個文法</div>
-        <div>繼續每天複習，文法就不會忘！</div>
+        <div>${t('gd_today', { n: queue.length })}</div>
+        <div>${t('gd_motivate')}</div>
       </div>
-      <div class="qactions"><button class="qstart" onclick="GrammarDrill.begin()">再來一輪</button><button class="qclose" onclick="GrammarDrill.close()">返回</button></div>`;
+      <div class="qactions"><button class="qstart" onclick="GrammarDrill.begin()">${t('gd_retry')}</button><button class="qclose" onclick="GrammarDrill.close()">${t('gd_back')}</button></div>`;
   }
 
   // ── Grammar Quiz Mode (fill-in-blank) ──
@@ -186,7 +186,7 @@ const GrammarDrill = (() => {
     const pureJ = blanked.replace(/<[^>]+>/g, '').replace(/'/g, "\\'");
     const spk = `<svg class="spk-inline" style="width:18px;height:18px;cursor:pointer;vertical-align:middle;margin-left:6px;stroke:var(--ac2);fill:none;stroke-width:2" onclick="speak('${pureJ}')" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg>`;
     document.getElementById('quizBox').innerHTML = `
-      <div class="qhd"><span>文法測驗 ${cur+1} / ${queue.length}</span><span>正確: ${gqScore}</span><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="GrammarDrill.close()">✕</button></div>
+      <div class="qhd"><span>${t('gd_quiz_mode')} ${cur+1} / ${queue.length}</span><span>${t('quiz_score', { n: gqScore })}</span><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="GrammarDrill.close()">✕</button></div>
       <div class="qprompt"><div style="font-size:16px;line-height:1.8;color:var(--tx)">${blanked}${spk}</div><div style="font-size:12px;color:var(--tx2);margin-top:4px">${eg.z}</div></div>
       <div class="qopts">${options.map((o, i) => '<button class="qopt" onclick="GrammarDrill.answerQuiz('+i+','+correctIdx+')">'+o+'</button>').join('')}</div>`;
   }
@@ -203,9 +203,9 @@ const GrammarDrill = (() => {
   function showQuizResults() {
     const pct = Math.round(gqScore / queue.length * 100);
     document.getElementById('quizBox').innerHTML = `
-      <h3>文法測驗結果</h3>
+      <h3>${t('gd_result')}</h3>
       <div class="qscore ${pct>=80?'good':pct>=60?'ok':'bad'}">${gqScore} / ${queue.length}（${pct}%）</div>
-      <div class="qactions"><button class="qstart" onclick="GrammarDrill.begin()">再來一次</button><button class="qclose" onclick="GrammarDrill.close()">返回</button></div>`;
+      <div class="qactions"><button class="qstart" onclick="GrammarDrill.begin()">${t('quiz_retry')}</button><button class="qclose" onclick="GrammarDrill.close()">${t('quiz_back')}</button></div>`;
   }
 
   function close() { document.getElementById('quizBg').classList.remove('show'); }

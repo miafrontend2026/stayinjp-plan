@@ -259,6 +259,9 @@ const I18n = (() => {
   ft_confuse: '易混淆詞比較 {n} 組收錄',
   ft_grammar: 'N5～N1 共 {total} 個文法點',
 
+  // Report error
+  report_error: '🚩 回報此項錯誤',
+
   // Language
   lang_label: '繁',
 },
@@ -481,6 +484,7 @@ const I18n = (() => {
   ft_vocab: '全站收录 N5~N1 共 {total} 个单词（本页 {lv} {n} 个）',
   ft_confuse: '易混淆词对比 {n} 组收录',
   ft_grammar: 'N5～N1 共 {total} 个语法点',
+  report_error: '🚩 回报此项错误',
   lang_label: '简',
 },
 
@@ -702,6 +706,7 @@ const I18n = (() => {
   ft_vocab: 'Site total N5–N1: {total} words (this page: {lv} {n})',
   ft_confuse: 'Confusable Pairs: {n} groups',
   ft_grammar: 'N5–N1: {total} grammar points',
+  report_error: '🚩 Report this issue',
   lang_label: 'EN',
 }
   };

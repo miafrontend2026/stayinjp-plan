@@ -70,7 +70,7 @@ const SRS = (() => {
     queue = [];
     due.forEach(x => { const v = getVocabData(lvl).find(w => w.w === x.word); if (v) queue.push({ ...v, isNew: false }); });
     nw.forEach(v => queue.push({ ...v, isNew: true }));
-    if (!queue.length) { alert('今天沒有需要複習的單字！你可以先去測驗模式學新詞。'); return; }
+    if (!queue.length) { alert(t('srs_no_review')); return; }
     cur = 0;
     renderCard();
     document.getElementById('quizBg').classList.add('show');
@@ -79,25 +79,25 @@ const SRS = (() => {
   function renderCard() {
     const item = queue[cur], st = getStats(lvl);
     document.getElementById('quizBox').innerHTML = `
-      <div class="qhd"><span>複習 ${cur+1} / ${queue.length}</span><span>${item.isNew?'🆕 新詞':'📖 複習'}</span><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="SRS.close()">✕</button></div>
+      <div class="qhd"><span>${t('review')} ${cur+1} / ${queue.length}</span><span>${item.isNew?t('srs_new'):t('srs_review')}</span><button class="qclose" style="width:auto;margin:0;padding:2px 10px" onclick="SRS.close()">✕</button></div>
       <div class="srs-card" id="srsCard" onclick="SRS.flip()">
         <div class="srs-front" id="srsFront">
           <div class="qmain">${item.w}</div>
           ${item.w!==item.r?'<div class="qsub">'+item.r+'</div>':''}
           <div style="margin:8px 0"><svg class="spk" style="width:24px;height:24px;opacity:.6" onclick="event.stopPropagation();speak('${(item.r || item.w).replace(/'/g,"\\'")}')" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg></div>
-          <div class="srs-hint">點擊翻面查看答案</div>
+          <div class="srs-hint">${t('srs_flip')}</div>
         </div>
         <div class="srs-back" id="srsBack" style="display:none">
           <div class="qmain">${item.w}</div>
           ${item.w!==item.r?'<div class="qsub">'+item.r+'</div>':''}
           ${item.m && item.m!==item.w ? '<div class="srs-meaning">'+item.m+'</div>' : ''}
           <div class="srs-btns">
-            <button class="srs-btn srs-hard" onclick="event.stopPropagation();SRS.rate(false)">不會</button>
-            <button class="srs-btn srs-ok" onclick="event.stopPropagation();SRS.rate(true)">記得</button>
+            <button class="srs-btn srs-hard" onclick="event.stopPropagation();SRS.rate(false)">${t('srs_hard')}</button>
+            <button class="srs-btn srs-ok" onclick="event.stopPropagation();SRS.rate(true)">${t('srs_ok')}</button>
           </div>
         </div>
       </div>
-      <div class="srs-stats">已學 ${st.total} ｜ 待複習 ${st.due} ｜ 已掌握 ${st.mastered}</div>`;
+      <div class="srs-stats">${t('srs_stats', { learned: st.total, due: st.due, mastered: st.mastered })}</div>`;
   }
 
   function flip() {
@@ -116,14 +116,14 @@ const SRS = (() => {
   function showDone() {
     const st = getStats(lvl);
     document.getElementById('quizBox').innerHTML = `
-      <h3>複習完成！</h3>
+      <h3>${t('srs_done')}</h3>
       <div class="srs-done-stats">
-        <div>今日複習：${queue.length} 個</div>
-        <div>累計已學：${st.total} 個</div>
-        <div>已掌握：${st.mastered} 個</div>
-        <div>學習中：${st.learning} 個</div>
+        <div>${t('srs_today', { n: queue.length })}</div>
+        <div>${t('srs_total_learned', { n: st.total })}</div>
+        <div>${t('srs_total_mastered', { n: st.mastered })}</div>
+        <div>${t('srs_total_learning', { n: st.learning })}</div>
       </div>
-      <button class="qstart" onclick="SRS.close()">返回</button>`;
+      <button class="qstart" onclick="SRS.close()">${t('quiz_back')}</button>`;
   }
 
   function close() {
@@ -134,7 +134,11 @@ const SRS = (() => {
   function updateReviewCount() {
     const c = getDueCount();
     const btn = document.getElementById('reviewBtn');
-    if (btn) btn.textContent = c ? '複習(' + c + ')' : '複習';
+    if (!btn) return;
+    const span = btn.querySelector('[data-i18n]') || btn;
+    const base = t('review');
+    if (span === btn) btn.textContent = c ? base + '(' + c + ')' : base;
+    else span.textContent = c ? base + '(' + c + ')' : base;
   }
 
   return { start, record, flip, rate, close, getDueCount, updateReviewCount, getStats };
