@@ -89,6 +89,15 @@ a:hover { text-decoration: underline; }
 .theme-btn:hover { color: var(--tx); background: var(--bg3); }
 .theme-btn svg { width: 18px; height: 18px; }
 
+/* Language toggle */
+.lang-btn {
+  background: var(--bg3); border: 1px solid var(--bd); cursor: pointer;
+  color: var(--tx2); padding: 2px 8px; font-size: 11px; font-weight: 600;
+  border-radius: 8px; font-family: inherit; white-space: nowrap;
+  transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+}
+.lang-btn:hover { color: var(--ac); border-color: var(--ac); }
+
 /* == Main == */
 .main {
   max-width: 640px; margin: 0 auto;
@@ -191,6 +200,7 @@ a:hover { text-decoration: underline; }
     <div class="hd-links">
       <a href="index.html">學習工具</a>
       <a href="home.html">首頁</a>
+      <button class="lang-btn" id="langBtn" onclick="cycleLang()">繁</button>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="切換深色模式"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></button>
     </div>
   </div>
@@ -270,7 +280,91 @@ a:hover { text-decoration: underline; }
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
+<script src="i18n.js"></script>
 <script>
+// ========== I18N (繁/簡切換 via OpenCC runtime 轉換) ==========
+const LANG_CYCLE = ['zh-TW', 'zh-CN'];
+const LANG_LABEL = { 'zh-TW': '繁', 'zh-CN': '简' };
+if (typeof I18n !== 'undefined' && !LANG_CYCLE.includes(I18n.getLang())) I18n.setLang('zh-TW');
+
+let _tw2cn = null;
+function ensureOpenCC() {
+  return new Promise((resolve) => {
+    if (_tw2cn) return resolve(_tw2cn);
+    if (window.OpenCC) { _tw2cn = window.OpenCC.Converter({ from: 'tw', to: 'cn' }); return resolve(_tw2cn); }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js';
+    s.onload = () => { _tw2cn = window.OpenCC.Converter({ from: 'tw', to: 'cn' }); resolve(_tw2cn); };
+    s.onerror = () => resolve(null);
+    document.head.appendChild(s);
+  });
+}
+
+const _origText = new WeakMap();
+function collectTextNodes() {
+  const nodes = [];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode(n) {
+      const p = n.parentElement;
+      if (!p) return NodeFilter.FILTER_REJECT;
+      const tag = p.tagName;
+      if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'RT') return NodeFilter.FILTER_REJECT;
+      if (!n.nodeValue || !/[一-龥]/.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  let n;
+  while ((n = walker.nextNode())) nodes.push(n);
+  return nodes;
+}
+
+// 特別處理 <option> 文字（不是 text node 子元素）
+function applyOptionsCvt(toSimplified) {
+  document.querySelectorAll('option, input[placeholder], textarea[placeholder]').forEach(el => {
+    if (el.tagName === 'OPTION' && el.textContent && /[一-龥]/.test(el.textContent)) {
+      if (!_origText.has(el)) _origText.set(el, el.textContent);
+      el.textContent = toSimplified && _tw2cn ? _tw2cn(_origText.get(el)) : _origText.get(el);
+    }
+    if (el.placeholder && /[一-龥]/.test(el.placeholder)) {
+      const key = el;
+      if (!_origText.has(key)) _origText.set(key, el.placeholder);
+      el.placeholder = toSimplified && _tw2cn ? _tw2cn(_origText.get(key)) : _origText.get(key);
+    }
+  });
+}
+
+function applyPageLang() {
+  const lang = I18n.getLang();
+  const btn = document.getElementById('langBtn');
+  if (btn) btn.textContent = LANG_LABEL[lang] || '繁';
+  document.documentElement.lang = lang;
+  const toSim = lang === 'zh-CN';
+  const nodes = collectTextNodes();
+  if (toSim && _tw2cn) {
+    nodes.forEach(n => {
+      if (!_origText.has(n)) _origText.set(n, n.nodeValue);
+      n.nodeValue = _tw2cn(_origText.get(n));
+    });
+  } else {
+    nodes.forEach(n => { if (_origText.has(n)) n.nodeValue = _origText.get(n); });
+  }
+  applyOptionsCvt(toSim);
+}
+
+async function cycleLang() {
+  const cur = I18n.getLang();
+  const idx = LANG_CYCLE.indexOf(cur);
+  const next = LANG_CYCLE[(idx + 1) % LANG_CYCLE.length];
+  I18n.setLang(next);
+  if (next === 'zh-CN') await ensureOpenCC();
+  applyPageLang();
+}
+
+(async () => {
+  if (I18n.getLang() === 'zh-CN') { await ensureOpenCC(); applyPageLang(); }
+  else applyPageLang();
+})();
+
 // ========== THEME ==========
 function initTheme() {
   const saved = localStorage.getItem('theme');
