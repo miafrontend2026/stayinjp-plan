@@ -254,7 +254,7 @@ const I18n = (() => {
 
   // Footer
   copyright: '© 2026 再留計劃 — All rights reserved.',
-  disclaimer: '本站為原創整理，內容僅供自學參考，難免有誤，以 JLPT 官方教材為準。發現錯誤歡迎透過卡片上的「🚩 回報此項錯誤」告知。不隸屬於 JLPT 官方或任何教育機構。',
+  disclaimer: '本站為原創學習整理，建議搭配 JLPT 官方教材使用。若發現內容有誤，歡迎點卡片上「🚩 回報此項錯誤」告知。不隸屬於 JLPT 官方或任何教育機構。',
   ft_vocab: '全站收錄 N5~N1 共 {total} 個單字（本頁 {lv} {n} 個）',
   ft_confuse: '易混淆詞比較 {n} 組收錄',
   ft_grammar: 'N5～N1 共 {total} 個文法點',
@@ -488,7 +488,7 @@ const I18n = (() => {
   ls_close: '关闭',
   ls_no_tts: '您的浏览器不支持语音合成',
   copyright: '© 2026 再留计划 — All rights reserved.',
-  disclaimer: '本站为原创整理，内容仅供自学参考，难免有误，以 JLPT 官方教材为准。发现错误欢迎透过卡片上的「🚩 回报此项错误」告知。不隶属于 JLPT 官方或任何教育机构。',
+  disclaimer: '本站为原创学习整理，建议搭配 JLPT 官方教材使用。若发现内容有误，欢迎点卡片上「🚩 回报此项错误」告知。不隶属于 JLPT 官方或任何教育机构。',
   ft_vocab: '全站收录 N5~N1 共 {total} 个单词（本页 {lv} {n} 个）',
   ft_confuse: '易混淆词对比 {n} 组收录',
   ft_grammar: 'N5～N1 共 {total} 个语法点',
@@ -714,7 +714,7 @@ const I18n = (() => {
   ls_close: 'Close',
   ls_no_tts: 'Your browser does not support speech synthesis',
   copyright: '© 2026 StayJP Study — All rights reserved.',
-  disclaimer: 'Original content for self-study reference only. Errors may exist — please refer to official JLPT materials for accuracy. Spotted an error? Click "🚩 Report this issue" on any card. Not affiliated with JLPT or any educational institution.',
+  disclaimer: 'Original study materials. Best used alongside official JLPT textbooks. Spot an error? Tap "🚩 Report this issue" on any card. Not affiliated with JLPT or any educational institution.',
   ft_vocab: 'Site total N5–N1: {total} words (this page: {lv} {n})',
   ft_confuse: 'Confusable Pairs: {n} groups',
   ft_grammar: 'N5–N1: {total} grammar points',
