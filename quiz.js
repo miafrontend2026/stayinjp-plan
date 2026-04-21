@@ -124,11 +124,17 @@ const Quiz = (() => {
         const correctAnswer = disp(r.word);
         return `<div class="qr ng"><span class="qrc">✗</span> ${summary}　${t('quiz_you_chose', { chose: disp(r.options[r.chosenIdx]), correct: correctAnswer })}</div>`;
       }).join('')}</div>
-      <div class="qactions"><button class="qstart" onclick="Quiz.begin()">${t('quiz_retry')}</button><button class="qclose" onclick="Quiz.close()">${t('quiz_back')}</button></div>`;
+      <div class="qactions"><button class="qstart" onclick="Quiz.begin()">下一輪</button><button class="qstart" style="background:var(--bg3);color:var(--tx)" onclick="Quiz.retrySame()">再測同一批</button><button class="qclose" onclick="Quiz.close()">${t('quiz_back')}</button></div>`;
   }
 
   function close() { document.getElementById('quizBg').classList.remove('show'); }
   function toggleKanji() { showKanji = !showKanji; renderQ(); }
+  // 再測同一批題目（不重新抽題）
+  function retrySame() {
+    if (!questions || !questions.length) return begin();
+    score = 0; current = 0; results = [];
+    renderQ();
+  }
 
-  return { start, begin, answer, close, toggleKanji };
+  return { start, begin, answer, close, toggleKanji, retrySame };
 })();
