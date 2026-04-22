@@ -767,6 +767,24 @@ body {
 @keyframes qScoreIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: none; } }
 .qscore { animation: qScoreIn .32s cubic-bezier(.2,.8,.2,1); }
 
+/* == 內容列表浮入 + 卡片微抬升（乾淨舒服派） == */
+@keyframes listIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.gc, .vi { animation: listIn .26s var(--ease) both; }
+/* 虛擬列表滾動時不動畫，避免晃眼 */
+#vl-container .vi, .vl-item .vi { animation: none; }
+/* 卡片 hover 輕抬 1px + 淡陰影 */
+.gc, .vi {
+  transition: transform .18s var(--ease), border-color .2s var(--ease), box-shadow .2s var(--ease), background .2s var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .gc:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+  .vi:hover { transform: translateY(-1px); }
+  [data-theme="dark"] .gc:hover { box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+}
+/* 主要區塊切換時的淡入（mode/tab 切換重渲染） */
+@keyframes fadeInSoft { from { opacity: 0; } to { opacity: 1; } }
+#main > * { animation: fadeInSoft .22s var(--ease); }
+
 /* SRS */
 .srs-card {
   text-align: center; padding: 28px 16px; cursor: pointer;
