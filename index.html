@@ -455,15 +455,16 @@ select::-ms-expand { display: none; }
 .gc .ex { padding: 8px 0; border-bottom: 1px dashed var(--bd); }
 .gc .ex:last-child { border-bottom: none; }
 .gc .ex .j { font-size: 14px; color: var(--ac2); font-weight: 500; line-height: 1.7; }
-.gc .ex-spk {
+.ex-spk {
   width: 16px; height: 16px; cursor: pointer;
   vertical-align: middle; margin-left: 6px;
   fill: none; stroke: var(--ac2); stroke-width: 2;
   opacity: .5; transition: opacity .2s var(--ease);
   -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
 }
-.gc .ex-spk:hover { opacity: 1; }
-.gc .ex-spk:active { opacity: 1; }
+.ex-spk:hover { opacity: 1; }
+.ex-spk:active { opacity: 1; }
 .gc-report {
   display: inline-block; margin-top: 12px;
   font-size: 11px; color: var(--tx3);
