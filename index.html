@@ -755,6 +755,26 @@ body {
 .qactions { display: flex; gap: 8px; }
 .qactions .qstart, .qactions .qclose { flex: 1; }
 
+/* == 絲滑動效強化（全站共用 modal / button） == */
+@keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalBoxIn { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+.quiz-bg.show { animation: modalFadeIn .18s var(--ease); }
+.quiz-bg.show .quiz-box { animation: modalBoxIn .26s cubic-bezier(.2,.8,.2,1); }
+/* 所有可點元素按下微縮，iOS 風回饋 */
+.qstart, .qclose, .qo button, .qopt, .qo-btn, .mode-pill, .tab-pill {
+  transition: transform .12s var(--ease), background .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease), opacity .2s var(--ease);
+}
+.qstart:active, .qclose:active, .qo button:active, .qopt:active,
+.qo-btn:active, .mode-pill:active, .tab-pill:active { transform: scale(.97); }
+/* 答對放大脈衝，答錯輕微左右搖 */
+@keyframes qPulseOk { 0%,100% { transform: none; } 50% { transform: scale(1.04); } }
+@keyframes qShake { 0%,100% { transform: none; } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.qopt.qcorrect { animation: qPulseOk .3s var(--ease); }
+.qopt.qwrong { animation: qShake .26s var(--ease); }
+/* 結果分數浮現 */
+@keyframes qScoreIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: none; } }
+.qscore { animation: qScoreIn .32s cubic-bezier(.2,.8,.2,1); }
+
 /* SRS */
 .srs-card {
   text-align: center; padding: 28px 16px; cursor: pointer;
