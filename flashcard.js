@@ -2,6 +2,9 @@
 // 倒數自動翻面 + 手勢左右滑 + 自動播音 + 記錄 SRS
 const FlashCard = (() => {
   const EXAM_KEY = 'exam_date';
+  const BASE_KEY = 'base_level';    // 目前程度（這級以下視為已懂）'none'|'n5'|'n4'|'n3'|'n2'
+  const GOAL_KEY = 'goal_level';    // 目標考級 'n5'|'n4'|'n3'|'n2'|'n1'
+  const LEVELS = ['n5','n4','n3','n2','n1'];
   const COUNTDOWN_SEC = 20;
 
   let queue = [];
@@ -14,12 +17,32 @@ const FlashCard = (() => {
   let touchStartX = 0;
   let touchStartY = 0;
 
-  // ── Exam date ──
+  // ── Exam date / 程度 / 目標 ──
   function getExamDate() { return localStorage.getItem(EXAM_KEY) || ''; }
   function setExamDate(d) {
     if (d) localStorage.setItem(EXAM_KEY, d);
     else localStorage.removeItem(EXAM_KEY);
     if (typeof saveAllCloud === 'function') saveAllCloud();
+  }
+  function getBaseLevel() { return localStorage.getItem(BASE_KEY) || 'none'; }
+  function setBaseLevel(v) {
+    if (v) localStorage.setItem(BASE_KEY, v);
+    else localStorage.removeItem(BASE_KEY);
+    if (typeof saveAllCloud === 'function') saveAllCloud();
+  }
+  function getGoalLevel() { return localStorage.getItem(GOAL_KEY) || ''; }
+  function setGoalLevel(v) {
+    if (v) localStorage.setItem(GOAL_KEY, v);
+    else localStorage.removeItem(GOAL_KEY);
+    if (typeof saveAllCloud === 'function') saveAllCloud();
+  }
+  // 需要學的級別區間：base 以上（不含）～ goal（含）。n5 最簡單，n1 最難。
+  function scopeLevels(base, goal) {
+    if (!goal) return [];
+    const gi = LEVELS.indexOf(goal);
+    if (gi < 0) return [];
+    const bi = base === 'none' || !base ? -1 : LEVELS.indexOf(base);
+    return LEVELS.slice(bi + 1, gi + 1);
   }
   function daysUntilExam() {
     const d = getExamDate();
@@ -82,26 +105,62 @@ const FlashCard = (() => {
     const infoEl = document.getElementById('fcInfo');
     if (!infoEl) return;
     const lvEl = document.querySelector('#fcLevel .on');
-    const selEl = document.getElementById('fcExam');
+    const examEl = document.getElementById('fcExam');
+    const baseEl = document.getElementById('fcBase');
+    const goalEl = document.getElementById('fcGoal');
     const lv = lvEl ? lvEl.dataset.v : 'n5';
+    const base = baseEl ? baseEl.value : getBaseLevel();
+    const goal = goalEl ? goalEl.value : getGoalLevel();
     const data = getData(lv);
-    if (!data || !data.length) { infoEl.innerHTML = '<div style="color:var(--tx2)">此級別無單字資料</div>'; return; }
     const srs = JSON.parse(localStorage.getItem('srs_data') || '{}');
-    const pf = lv + ':';
-    const learned = Object.keys(srs).filter(k => k.startsWith(pf)).length;
-    const remaining = data.length - learned;
     const today = new Date().toISOString().split('T')[0];
-    const due = Object.keys(srs).filter(k => k.startsWith(pf) && srs[k].nextReview <= today).length;
-    const examIso = selEl && selEl.value ? selEl.value : '';
-    let html = `<div><strong>${lv.toUpperCase()} 進度：</strong>${learned} / ${data.length}（已學 ${Math.round(learned/data.length*100)}%）</div>`;
-    html += `<div><strong>還要背：</strong>${remaining} 個${due>0?`　<span style="color:var(--ac)">・今日待複習 ${due}</span>`:''}</div>`;
+
+    let html = '';
+    // 本輪級別的進度
+    if (data && data.length) {
+      const pf = lv + ':';
+      const learned = Object.keys(srs).filter(k => k.startsWith(pf)).length;
+      const due = Object.keys(srs).filter(k => k.startsWith(pf) && srs[k].nextReview <= today).length;
+      html += `<div><strong>${lv.toUpperCase()} 進度：</strong>${learned} / ${data.length}（已學 ${Math.round(learned/data.length*100)}%）${due>0?`　<span style="color:var(--ac)">・今日待複習 ${due}</span>`:''}</div>`;
+    } else {
+      html += `<div style="color:var(--tx2)">此級別無單字資料</div>`;
+    }
+
+    // 目標：累計從 base+1 到 goal 的所有級別
+    let scopeRemaining = null;
+    if (goal) {
+      const scope = scopeLevels(base, goal);
+      if (!scope.length) {
+        html += `<div style="color:var(--tx2);font-size:12px;margin-top:6px">目前程度已達目標，無需再背 🎉</div>`;
+      } else {
+        let totalTarget = 0, totalLearned = 0;
+        const parts = scope.map(l => {
+          const d = getData(l);
+          const cnt = d ? d.length : 0;
+          const lrn = Object.keys(srs).filter(k => k.startsWith(l + ':')).length;
+          totalTarget += cnt;
+          totalLearned += lrn;
+          return `${l.toUpperCase()} ${lrn}/${cnt}`;
+        });
+        scopeRemaining = totalTarget - totalLearned;
+        const baseLabel = (!base || base === 'none') ? '零基礎' : base.toUpperCase();
+        html += `<div style="margin-top:6px"><strong>${baseLabel} → ${goal.toUpperCase()} 目標：</strong>${totalLearned} / ${totalTarget}</div>`;
+        html += `<div style="color:var(--tx2);font-size:12px">${parts.join('　')}</div>`;
+        html += `<div><strong>還要背：</strong>${scopeRemaining} 個</div>`;
+      }
+    } else {
+      html += `<div style="color:var(--tx2);font-size:12px;margin-top:6px">選「目前程度」和「目標級別」後會顯示累計還要背多少</div>`;
+    }
+
+    // 考試倒數 + 建議
+    const examIso = examEl && examEl.value ? examEl.value : '';
     if (examIso) {
       const d = new Date(examIso); d.setHours(0,0,0,0);
       const t = new Date(); t.setHours(0,0,0,0);
       const days = Math.ceil((d - t) / 86400000);
       html += `<div><strong>考試倒數：</strong>${days >= 0 ? days + ' 天' : '已過 ' + (-days) + ' 天'}</div>`;
-      if (days > 0 && remaining > 0) {
-        const perDay = Math.ceil(remaining / days);
+      if (days > 0 && scopeRemaining !== null && scopeRemaining > 0) {
+        const perDay = Math.ceil(scopeRemaining / days);
         html += `<div style="color:var(--ac);font-weight:600;margin-top:4px">💡 建議每天背 ${perDay} 個才背得完</div>`;
       }
     } else {
@@ -116,6 +175,8 @@ const FlashCard = (() => {
     const box = document.getElementById('quizBox');
     const curLv = typeof currentLevel !== 'undefined' ? currentLevel : 'n5';
     const exam = getExamDate();
+    const base = getBaseLevel();
+    const goal = getGoalLevel();
     const upcoming = getUpcomingJlptDates(6);
     // 如果已存 exam 不在列表（舊資料 / 自訂），保留它
     const inList = upcoming.some(x => x.iso === exam);
@@ -125,6 +186,15 @@ const FlashCard = (() => {
       customOpt,
       ...upcoming.map(x => `<option value="${x.iso}" ${x.iso===exam?'selected':''}>${x.label}</option>`)
     ].join('');
+    const baseOptions = [
+      `<option value="none" ${base==='none'?'selected':''}>零基礎</option>`,
+      ...LEVELS.slice(0, 4).map(l => `<option value="${l}" ${base===l?'selected':''}>${l.toUpperCase()} 已學完</option>`)
+    ].join('');
+    const goalOptions = [
+      `<option value="" ${!goal?'selected':''}>未設定</option>`,
+      ...LEVELS.map(l => `<option value="${l}" ${goal===l?'selected':''}>${l.toUpperCase()}</option>`)
+    ].join('');
+    const selStyle = 'padding:8px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-family:inherit;font-size:14px;width:100%;cursor:pointer';
     box.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <h3 style="margin:0">⚡ 快速背單字</h3>
@@ -148,8 +218,16 @@ const FlashCard = (() => {
         <button data-v="due">待複習</button>
         <button data-v="random">全部隨機</button>
       </div></div>
+      <div class="qf" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label style="display:block;font-size:13px;color:var(--tx2);margin-bottom:5px;font-weight:600">目前程度</label>
+          <select id="fcBase" style="${selStyle}">${baseOptions}</select>
+        </div>
+        <div><label style="display:block;font-size:13px;color:var(--tx2);margin-bottom:5px;font-weight:600">目標級別</label>
+          <select id="fcGoal" style="${selStyle}">${goalOptions}</select>
+        </div>
+      </div>
       <div class="qf"><label>考試日期</label>
-        <select id="fcExam" style="padding:8px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-family:inherit;font-size:14px;width:100%;cursor:pointer">
+        <select id="fcExam" style="${selStyle}">
           ${examOptions}
         </select>
       </div>
@@ -170,6 +248,10 @@ const FlashCard = (() => {
       setExamDate(sel.value);
       renderStartInfo();
     });
+    const baseSel = document.getElementById('fcBase');
+    baseSel.addEventListener('change', () => { setBaseLevel(baseSel.value); renderStartInfo(); });
+    const goalSel = document.getElementById('fcGoal');
+    goalSel.addEventListener('change', () => { setGoalLevel(goalSel.value); renderStartInfo(); });
     renderStartInfo();
     document.getElementById('quizBg').classList.add('show');
   }
@@ -304,22 +386,43 @@ const FlashCard = (() => {
     clearInterval(timerId);
     const total = score.known + score.unknown;
     const pct = total ? Math.round(score.known / total * 100) : 0;
-    // 計算考試倒數 + 進度
     const days = daysUntilExam();
-    const data = getData(level);
     const srs = JSON.parse(localStorage.getItem('srs_data') || '{}');
+    const base = getBaseLevel(), goal = getGoalLevel();
+
+    // 本級進度
+    const data = getData(level);
     const pf = level + ':';
-    const learned = Object.keys(srs).filter(k => k.startsWith(pf)).length;
-    const total_vocab = data.length;
-    const remaining = total_vocab - learned;
-    const perDaySug = days && days > 0 && remaining > 0 ? Math.ceil(remaining / days) : null;
+    const lvLearned = Object.keys(srs).filter(k => k.startsWith(pf)).length;
+    const lvTotal = data.length;
+
+    // 目標累計
+    let scopeHtml = '';
+    let scopeRemaining = null;
+    if (goal) {
+      const scope = scopeLevels(base, goal);
+      if (scope.length) {
+        let totalTarget = 0, totalLearned = 0;
+        scope.forEach(l => {
+          const d = getData(l);
+          totalTarget += d ? d.length : 0;
+          totalLearned += Object.keys(srs).filter(k => k.startsWith(l + ':')).length;
+        });
+        scopeRemaining = totalTarget - totalLearned;
+        const baseLabel = (!base || base === 'none') ? '零基礎' : base.toUpperCase();
+        scopeHtml = `<div style="margin-top:4px"><strong>${baseLabel} → ${goal.toUpperCase()} 目標：</strong>${totalLearned} / ${totalTarget}（還要背 ${scopeRemaining} 個）</div>`;
+      }
+    }
+    const perDaySug = days && days > 0 && scopeRemaining !== null && scopeRemaining > 0
+      ? Math.ceil(scopeRemaining / days)
+      : (days && days > 0 && lvTotal - lvLearned > 0 ? Math.ceil((lvTotal - lvLearned) / days) : null);
 
     document.getElementById('quizBox').innerHTML = `
       <h3>本輪結束</h3>
       <div class="qscore ${pct>=80?'good':pct>=60?'ok':'bad'}">${score.known} / ${total}（${pct}%）</div>
       <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:14px;margin:14px 0;font-size:13px;line-height:1.9;color:var(--tx)">
-        <div><strong>${level.toUpperCase()} 進度：</strong>${learned} / ${total_vocab}（已學 ${Math.round(learned/total_vocab*100)}%）</div>
-        <div><strong>還要背：</strong>${remaining} 個</div>
+        <div><strong>${level.toUpperCase()} 進度：</strong>${lvLearned} / ${lvTotal}（已學 ${Math.round(lvLearned/lvTotal*100)}%）</div>
+        ${scopeHtml}
         ${days !== null ? `<div><strong>考試倒數：</strong>${days >= 0 ? days + ' 天' : '已過 ' + (-days) + ' 天'}</div>` : ''}
         ${perDaySug ? `<div style="color:var(--ac);font-weight:600;margin-top:4px">💡 建議每天背 ${perDaySug} 個才背得完</div>` : ''}
       </div>
