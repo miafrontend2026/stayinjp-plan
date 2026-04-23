@@ -1107,6 +1107,8 @@ select::-ms-expand { display: none; }
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<!-- Google Identity Services（繞過 Firebase authDomain ITP 問題） -->
+<script src="https://accounts.google.com/gsi/client" async defer onload="initGIS()"></script>
 
 <script>
 // ========== CONFIG ==========
@@ -1127,7 +1129,10 @@ if (fbConfig) {
   auth.onAuthStateChanged(u => { currentUser = u; updateAuthUI(); loadFavorites(); loadCloudData(); });
 }
 
-// ========== AUTH ==========
+// ========== AUTH（Google Identity Services）==========
+const GIS_CLIENT_ID = '666368174384-kbuofr7gt48idrnmsrvlmg1dtd162ojk.apps.googleusercontent.com';
+let gisReady = false;
+
 // 偵測 LINE/FB/IG 內嵌瀏覽器（Google OAuth 會回 disallowed_useragent）
 function isInAppBrowser() {
   const ua = navigator.userAgent || '';
@@ -1142,17 +1147,61 @@ function showInAppBanner() {
   document.body.appendChild(b);
 }
 
+// GIS 載入完成後呼叫
+function initGIS() {
+  if (!window.google || !google.accounts || !google.accounts.id) return;
+  google.accounts.id.initialize({
+    client_id: GIS_CLIENT_ID,
+    callback: handleGISCredential,
+    auto_select: false,
+    cancel_on_tap_outside: true
+  });
+  gisReady = true;
+  // 若目前沒登入，渲染 GIS 按鈕
+  if (!currentUser) renderGISBtn();
+}
+
+function renderGISBtn() {
+  const slot = document.getElementById('gisBtn');
+  if (!slot || !gisReady) return;
+  slot.innerHTML = '';
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  google.accounts.id.renderButton(slot, {
+    type: 'standard',
+    theme: isDark ? 'filled_black' : 'outline',
+    size: 'medium',
+    text: 'signin',
+    shape: 'pill',
+    logo_alignment: 'left'
+  });
+}
+
+// 拿到 Google ID token → 換 Firebase credential
+function handleGISCredential(response) {
+  if (!response || !response.credential) return;
+  const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
+  auth.signInWithCredential(credential).catch(e => alert('登入失敗: ' + (e.code || '') + ' — ' + (e.message || e)));
+}
+
+// 登出（或 in-app browser 時提示）
 function handleAuth() {
-  if (currentUser) { auth.signOut(); currentUser = null; updateAuthUI(); return; }
+  if (currentUser) {
+    if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+    auth.signOut();
+    currentUser = null;
+    updateAuthUI();
+    return;
+  }
   if (isInAppBrowser()) { showInAppBanner(); return; }
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert('登入失敗: ' + e.message));
+  // 未登入時 authArea 裡已渲染 GIS 按鈕，使用者直接點那個
 }
 function updateAuthUI() {
   const area = document.getElementById('authArea');
   if (currentUser) {
     area.innerHTML = `<span class="auth-btn" style="cursor:default"><img src="${currentUser.photoURL}" alt="">${currentUser.displayName.split(' ')[0]}</span><button class="logout-btn" onclick="handleAuth()">${t('logout')}</button>`;
   } else {
-    area.innerHTML = `<button class="auth-btn" id="authBtn" onclick="handleAuth()">${t('login')}</button>`;
+    area.innerHTML = `<div id="gisBtn" class="gis-slot"></div>`;
+    if (gisReady) renderGISBtn();
   }
 }
 
