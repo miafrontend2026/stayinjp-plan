@@ -1252,13 +1252,6 @@ function handleAuth() {
   if (isInAppBrowser()) { showInAppHelp(); return; }
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert('登入失敗: ' + e.message));
 }
-// 進站若在內嵌瀏覽器，主動提示一次（避免使用者點了登入才發現）
-window.addEventListener('load', () => {
-  if (isInAppBrowser() && !sessionStorage.getItem('inAppHelpShown')) {
-    sessionStorage.setItem('inAppHelpShown', '1');
-    setTimeout(showInAppHelp, 600);
-  }
-});
 function updateAuthUI() {
   const area = document.getElementById('authArea');
   if (!area) return;
