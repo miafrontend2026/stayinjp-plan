@@ -23,6 +23,8 @@ const Stats = (() => {
     h += `<button class="qo-btn stat-tab on" data-tab="overview" onclick="Stats.switchTab('overview')">${t('tab_overview')}</button>`;
     h += `<button class="qo-btn stat-tab" data-tab="history" onclick="Stats.switchTab('history')">${t('tab_history')}</button>`;
     h += `<button class="qo-btn stat-tab" data-tab="notebook" onclick="Stats.switchTab('notebook')">${t('tab_notebook')}</button>`;
+    const wqCnt = getWrongQuestions().length;
+    h += `<button class="qo-btn stat-tab" data-tab="wrongq" onclick="Stats.switchTab('wrongq')">錯題回顧${wqCnt?` (${wqCnt})`:''}</button>`;
     h += `<button class="qo-btn stat-tab" data-tab="weak" onclick="Stats.switchTab('weak')">${t('tab_weak')}</button>`;
     h += '</div>';
     h += '<div id="statContent">';
@@ -39,6 +41,7 @@ const Stats = (() => {
     if (tab === 'overview') c.innerHTML = buildOverview();
     else if (tab === 'history') c.innerHTML = buildHistory();
     else if (tab === 'notebook') c.innerHTML = buildNotebook();
+    else if (tab === 'wrongq') c.innerHTML = buildWrongQuestions();
     else if (tab === 'weak') c.innerHTML = buildWeakWords();
   }
 
@@ -357,5 +360,69 @@ const Stats = (() => {
     }, correct ? 500 : 1000);
   }
 
-  return { open, close, switchTab, quizWeak, retryWrong, _answerWeak, addToNotebook, removeFromNotebook, quizNotebook, reviewNotebook };
+  // ── 錯題回顧（聽力 / 閱讀 / 模考） ──
+  function getWrongQuestions() {
+    try { return JSON.parse(localStorage.getItem('wrong_questions')) || []; } catch(e) { return []; }
+  }
+  function saveWrongQuestions(arr) {
+    localStorage.setItem('wrong_questions', JSON.stringify(arr));
+    if (typeof saveAllCloud === 'function') saveAllCloud();
+  }
+  function addWrongQuestion(entry) {
+    if (!entry || !entry.mode || !entry.id) return;
+    const arr = getWrongQuestions();
+    const i = arr.findIndex(x => x.mode === entry.mode && x.id === entry.id);
+    const rec = { ts: Date.now(), ...entry };
+    if (i > -1) arr[i] = { ...arr[i], ...rec }; else arr.push(rec);
+    saveWrongQuestions(arr);
+  }
+  function removeWrongQuestion(mode, id) {
+    const arr = getWrongQuestions().filter(x => !(x.mode === mode && x.id === id));
+    saveWrongQuestions(arr);
+    switchTab('wrongq');
+  }
+
+  function buildWrongQuestions() {
+    const arr = getWrongQuestions().slice().sort((a,b) => (b.ts||0) - (a.ts||0));
+    let h = `<div class="st-section"><div class="st-title">錯題回顧 <span style="font-weight:400;font-size:12px;color:var(--tx2)">（${arr.length} 題）</span></div>`;
+    if (!arr.length) {
+      h += `<div class="st-empty">還沒有錯題。<br>聽力、閱讀、模考答錯時會自動收進這裡。</div>`;
+    } else {
+      const modeLbl = { listening: '🎧 聽力', reading: '📖 閱讀', mock: '📝 模考' };
+      const modeColor = { listening: '#2563EB', reading: '#16a34a', mock: '#9333EA' };
+      h += '<div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">';
+      arr.forEach(w => {
+        const lbl = modeLbl[w.mode] || w.mode;
+        const col = modeColor[w.mode] || 'var(--ac)';
+        const lv = (w.level||'').toUpperCase();
+        const opts = (w.options || []).map((o, i) => {
+          const isCorrect = i === w.correctIdx;
+          const isUser = i === w.userIdx;
+          let style = 'padding:4px 8px;border-radius:6px;font-size:12px;margin:2px 0;';
+          if (isCorrect) style += 'background:rgba(22,163,74,.15);color:var(--correct,#16a34a);font-weight:600;';
+          else if (isUser) style += 'background:rgba(220,38,38,.12);color:var(--wrong,#dc2626);text-decoration:line-through;';
+          else style += 'color:var(--tx2);';
+          const mark = isCorrect ? '✓ ' : (isUser ? '✗ ' : '　');
+          return `<div style="${style}">${mark}${o}</div>`;
+        }).join('');
+        h += `<div style="border:1px solid var(--bd);border-radius:8px;padding:10px;background:var(--bg2)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-size:11px;font-weight:700;color:${col}">${lbl}</span>
+            ${lv?`<span style="font-size:11px;font-weight:600;color:var(--ac2)">${lv}</span>`:''}
+            <span style="flex:1"></span>
+            <button style="background:none;border:none;color:var(--wrong,#dc2626);cursor:pointer;font-size:12px;padding:2px 4px" onclick="Stats.removeWrongQuestion('${w.mode}','${(w.id+'').replace(/'/g,"\\'")}')">✕</button>
+          </div>
+          ${w.text ? `<div style="font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:6px;white-space:pre-wrap;max-height:120px;overflow:auto">${w.text}</div>` : ''}
+          <div style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:4px">${w.q || ''}</div>
+          ${opts}
+        </div>`;
+      });
+      h += '</div>';
+      h += `<div style="margin-top:10px;font-size:11px;color:var(--tx3)">提示：聽力/閱讀/模考非單字題答錯會自動加入這裡。單字答錯仍會進「生詞本」。</div>`;
+    }
+    h += '</div>';
+    return h;
+  }
+
+  return { open, close, switchTab, quizWeak, retryWrong, _answerWeak, addToNotebook, removeFromNotebook, quizNotebook, reviewNotebook, addWrongQuestion, getWrongQuestions, removeWrongQuestion };
 })();

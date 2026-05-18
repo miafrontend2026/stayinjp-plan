@@ -1002,6 +1002,9 @@ const Listening = (() => {
     if (correct) score++;
     answered.push({ q: item.q, correct, type: item.type });
     markDone(item.id);  // 答過就標記，下輪不再抽到
+    if (!correct && typeof Stats !== 'undefined' && Stats.addWrongQuestion) {
+      Stats.addWrongQuestion({ mode:'listening', id:item.id, level:item.level, text:item.script, q:item.q, options:item.options, correctIdx:item.correct, userIdx:optIdx });
+    }
 
     const opts = document.querySelectorAll('#lsOpts .qopt');
     opts.forEach((b, i) => {

@@ -591,6 +591,30 @@ const MockExam = (() => {
       SRS.record(examLevel, q.word.w, correct);
     }
 
+    // 答錯：單字題進生詞本，其他題（文法/讀解）進錯題回顧
+    if (!correct && typeof Stats !== 'undefined') {
+      if (q.word && Stats.addToNotebook) {
+        // 抑制 addToNotebook 的 alert：直接寫 localStorage
+        try {
+          const nb = JSON.parse(localStorage.getItem('word_notebook')) || [];
+          if (!nb.find(x => x.w === q.word.w && x.lv === examLevel)) {
+            nb.push({ w: q.word.w, r: q.word.r || q.word.w, m: q.word.m || '', lv: examLevel, added: new Date().toISOString() });
+            localStorage.setItem('word_notebook', JSON.stringify(nb));
+            if (typeof saveAllCloud === 'function') saveAllCloud();
+          }
+        } catch(e) {}
+      } else if (Stats.addWrongQuestion) {
+        const plainDisplay = (q.display || '').replace(/<[^>]+>/g, '').trim();
+        const sigSrc = `${q.type}|${q.prompt || ''}|${plainDisplay}|${(q.options || []).join('|')}`;
+        let hash = 0; for (let i = 0; i < sigSrc.length; i++) { hash = ((hash << 5) - hash + sigSrc.charCodeAt(i)) | 0; }
+        Stats.addWrongQuestion({
+          mode: 'mock', id: `${examLevel}-t${q.type}-${(hash>>>0).toString(36)}`,
+          level: examLevel, text: plainDisplay, q: q.prompt || q.typeName || '',
+          options: q.options, correctIdx: q.correctIdx, userIdx: idx,
+        });
+      }
+    }
+
     setTimeout(() => {
       currentQ++;
       if (currentQ >= section.questions.length) {

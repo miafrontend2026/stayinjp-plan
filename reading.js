@@ -671,6 +671,10 @@ const Reading = (() => {
     const correct = idx === q.correct;
     if (correct) score++;
     answered.push({ q: q.q, correct, chosenIdx: idx, correctIdx: q.correct, options: q.options });
+    if (!correct && typeof Stats !== 'undefined' && Stats.addWrongQuestion) {
+      const plainPassage = (currentPassage.passage || '').replace(/<rt>[^<]*<\/rt>/g, '').replace(/<\/?ruby>/g, '');
+      Stats.addWrongQuestion({ mode:'reading', id:`${currentPassage.id}-q${currentQ}`, level:currentPassage.level, text:plainPassage, q:q.q, options:q.options, correctIdx:q.correct, userIdx:idx });
+    }
 
     const opts = document.querySelectorAll('#rdQuestions .qopt');
     opts.forEach((b, i) => {

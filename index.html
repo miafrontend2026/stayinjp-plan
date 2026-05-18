@@ -1407,6 +1407,16 @@ function loadCloudData() {
             if (!prev || (x.added && prev.added && x.added < prev.added)) byKey.set(key, x);
           });
           merged = [...byKey.values()];
+        } else if (k === 'wrong_questions') {
+          // 語意去重：同 (mode, id) 只保留一份（取較新的 ts）
+          const byKey = new Map();
+          [...local, ...d[k]].forEach(x => {
+            if (!x || !x.mode || !x.id) return;
+            const key = x.mode + ' ' + x.id;
+            const prev = byKey.get(key);
+            if (!prev || ((x.ts||0) > (prev.ts||0))) byKey.set(key, x);
+          });
+          merged = [...byKey.values()];
         } else {
           // 其他 array：JSON 字串去重
           const seen = new Set();
@@ -1475,7 +1485,7 @@ function saveSRSCloud() {
   db.collection('users').doc(currentUser.uid).set({ srs_data: d }, { merge: true });
 }
 // ── Sync ALL data ──
-const SYNC_KEYS = ['study_log','word_notebook','grammar_srs','grammar_weak','daily_progress','mock_exam_history','exam_date','base_level','goal_level','reading_done','listening_scores','listening_done','shadow_favs'];
+const SYNC_KEYS = ['study_log','word_notebook','grammar_srs','grammar_weak','daily_progress','mock_exam_history','exam_date','base_level','goal_level','reading_done','listening_scores','listening_done','shadow_favs','wrong_questions'];
 function saveAllCloud() {
   if (!currentUser || !db) return;
   const payload = {};
@@ -1485,7 +1495,35 @@ function saveAllCloud() {
   if (Object.keys(payload).length) db.collection('users').doc(currentUser.uid).set(payload, { merge: true });
 }
 function favKey() { return currentMode==='vocab' ? 'v'+currentLevel : currentLevel; }
+// 單字收藏統一從 word_notebook 取資料；文法/比較仍用 favorites[lv]
+function getVocabFavSet(lv) {
+  try {
+    const nb = JSON.parse(localStorage.getItem('word_notebook')) || [];
+    const s = new Set();
+    nb.forEach(x => { if (x && x.lv === lv) s.add(x.w); });
+    return s;
+  } catch(e) { return new Set(); }
+}
 function toggleFav(id) {
+  if (currentMode === 'vocab') {
+    const lv = currentLevel;
+    const entry = (getVocabData(lv) || []).find(d => d.w === id);
+    let nb; try { nb = JSON.parse(localStorage.getItem('word_notebook')) || []; } catch(e) { nb = []; }
+    const existsIdx = nb.findIndex(x => x.w === id && x.lv === lv);
+    const adding = existsIdx === -1;
+    if (adding) {
+      nb.push({ w: id, r: entry?.r || id, m: entry?.m || '', lv, added: new Date().toISOString() });
+    } else {
+      nb.splice(existsIdx, 1);
+    }
+    localStorage.setItem('word_notebook', JSON.stringify(nb));
+    if (typeof saveAllCloud === 'function') saveAllCloud();
+    const star = document.querySelector(`[data-fid="${id}"] .star`);
+    if (star) star.classList.toggle('on', adding);
+    updateFavCount();
+    track(adding ? 'fav_add' : 'fav_remove', { kind: 'v'+lv });
+    return;
+  }
   const k = favKey();
   const idx = favorites[k].indexOf(id);
   const adding = idx === -1;
@@ -1499,7 +1537,7 @@ function toggleFav(id) {
 function updateFavCount() {
   const btn = document.getElementById('favBtn');
   if (!btn) return;
-  const c = (favorites[favKey()]||[]).length;
+  const c = currentMode === 'vocab' ? getVocabFavSet(currentLevel).size : (favorites[favKey()]||[]).length;
   btn.textContent = c ? `★ ${c}` : '★';
 }
 
@@ -2490,8 +2528,8 @@ function getVocabData(lv) {
 // ========== RENDER VOCAB ==========
 function renderVocab() {
   const data = getVocabData(currentLevel);
-  const fk = favKey();
-  const favList = favorites[fk] || [];
+  const favSet = getVocabFavSet(currentLevel);
+  const favList = [...favSet];
   const mn = document.getElementById('mn');
   const sd = document.getElementById('sd');
   const lf = searchTerm;
@@ -2918,6 +2956,32 @@ applyI18n();
 
 // Init
 loadFavorites();
+
+// 一次性遷移：把舊版 favorites.v{lv} 的單字 ★ 收藏併入 word_notebook（單字池統一）
+(function migrateVocabFavToNotebook() {
+  if (localStorage.getItem('migrated_vocab_fav_v1')) return;
+  let nb; try { nb = JSON.parse(localStorage.getItem('word_notebook')) || []; } catch(e) { nb = []; }
+  let changed = false;
+  ['n5','n4','n3','n2','n1'].forEach(lv => {
+    const arr = (favorites && favorites['v'+lv]) || [];
+    if (!arr.length) return;
+    const data = getVocabData(lv);
+    arr.forEach(w => {
+      if (nb.find(x => x.w === w && x.lv === lv)) return;
+      const entry = data.find(d => d.w === w);
+      nb.push({ w, r: entry?.r || w, m: entry?.m || '', lv, added: new Date().toISOString() });
+      changed = true;
+    });
+    favorites['v'+lv] = [];
+  });
+  if (changed) {
+    localStorage.setItem('word_notebook', JSON.stringify(nb));
+    saveFavLocal();
+    if (typeof saveAllCloud === 'function') saveAllCloud();
+  }
+  localStorage.setItem('migrated_vocab_fav_v1', '1');
+})();
+
 updateAuthUI();
 updateTabs();
 setTimeout(fixHeaderHeight, 50);
