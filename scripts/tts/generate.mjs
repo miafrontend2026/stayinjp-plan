@@ -88,3 +88,21 @@ const finalCount = writeManifest();
 
 console.log(`\nDone. made=${made} skipped=${skipped} failed=${failed}`);
 console.log(`Manifest entries: ${finalCount} → ${path.relative(ROOT, MANIFEST_JS)}`);
+
+// 重生過 mp3 就 bump sw.js 的 CACHE_NAME，否則 SW cache-first 會永遠回舊音檔
+if (made > 0) {
+  const swPath = path.join(ROOT, 'sw.js');
+  try {
+    const sw = fs.readFileSync(swPath, 'utf8');
+    const m = sw.match(/(CACHE_NAME\s*=\s*['"]stayjp-v)(\d+)(['"])/);
+    if (m) {
+      const next = parseInt(m[2], 10) + 1;
+      fs.writeFileSync(swPath, sw.replace(m[0], `${m[1]}${next}${m[3]}`), 'utf8');
+      console.log(`sw.js CACHE_NAME: stayjp-v${m[2]} → stayjp-v${next} (bumped to invalidate audio cache)`);
+    } else {
+      console.warn(`sw.js: CACHE_NAME pattern not matched — please bump manually.`);
+    }
+  } catch (e) {
+    console.warn(`sw.js bump failed: ${e.message}`);
+  }
+}
